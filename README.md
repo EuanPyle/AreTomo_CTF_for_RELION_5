@@ -21,3 +21,5 @@ It does not perform or overwrite tilt series alignment.
 You have AreTomo2 (only v2) installed. 
 
 Your project was carried out in RELION 5.
+
+Still carry out a CTF estimation job in CTFFIND so RELION can get the astigmatism values.

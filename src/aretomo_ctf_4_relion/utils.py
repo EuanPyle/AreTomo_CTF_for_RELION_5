@@ -3,16 +3,8 @@ from pathlib import Path
 import os
 import numpy as np
 
-tsa_star = "AlignTiltSeries/job008/aligned_tilt_series.star" #.star from AlignTiltSeries job in RELION 5
-is_imod = False #Was the alignment done in IMOD, true or false?
-output_star = "AlignTiltSeries/job008/aligned_tilt_series_ctf.star" #desired output name
-exe = 'AreTomo2' #Command which brings up AreTomo2 on cmd line
-
-#######
-
-ori_star = starfile.read(tsa_star)
-
-def run_aretomo2_ctf(star_row):
+def run_aretomo2_ctf(star_row, tsa_is_imod, tsa_dir):
+    tsa_path = tsa_dir
     ts_name = star_row.rlnTomoName
     voltage = star_row.rlnVoltage
     cs = star_row.rlnSphericalAberration
@@ -23,7 +15,7 @@ def run_aretomo2_ctf(star_row):
 
     command = f'{exe} -InMrc {str(ts_path)}/{ts_name}.mrc -OutMrc {str(ts_path)}/delete_me.mrc -Align 0 -PixSize {pix_size} -Kv {voltage} -Cs {cs} -AmpContrast {ac} -VolZ 0 -DarkTol 0.0000000001'
 
-    if is_imod is True:
+    if tsa_is_imod is True:
         command += f' -AngFile {str(ts_path)}/{ts_name}.tlt '
     else:
         command += f' -AlnFile {str(ts_path)}/{ts_name}.aln '
@@ -31,10 +23,10 @@ def run_aretomo2_ctf(star_row):
     os.system(command)
     os.system(f'rm {str(ts_path)}/delete_me.mrc')
 
-def update_defocus(star_row):
+def update_defocus(star_row, tsa_dir):
     tilt_series_star_path = Path(star_row.rlnTomoTiltSeriesStarFile)
     ts_star = starfile.read(tilt_series_star_path)
-    tsa_path = Path(star_row.rlnTomoTiltSeriesStarFile).parent.parent
+    tsa_path = tsa_dir
     ts_root = str(tsa_path / 'external' / star_row.rlnTomoName)
     defocus_file = f'{ts_root}/{star_row.rlnTomoName}_ctf.txt'
     defocus = np.loadtxt(defocus_file)[:,1:7]
@@ -50,10 +42,3 @@ def update_defocus(star_row):
 
 def update_global_star(star_row):
     return star_row['rlnTomoTiltSeriesStarFile'].replace('.star','_ctf.star')
-
-ori_star.apply(lambda star_row: run_aretomo2_ctf(star_row), axis=1)
-ori_star.apply(lambda star_row: update_defocus(star_row), axis=1)
-
-ori_star['rlnTomoTiltSeriesStarFile'] = ori_star.apply(lambda star_row: update_global_star(star_row), axis=1)
-starfile.write(ori_star,output_star)
-               

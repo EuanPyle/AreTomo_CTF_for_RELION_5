@@ -35,11 +35,15 @@ def update_defocus(star_row):
     tilt_series_star_path = Path(star_row.rlnTomoTiltSeriesStarFile)
     ts_star = starfile.read(tilt_series_star_path)
     tsa_path = Path(star_row.rlnTomoTiltSeriesStarFile).parent.parent
-    defocus_file = str(tsa_path / 'external' / star_row.rlnTomoName)
-    defocus_file = f'{defocus_file}/{star_row.rlnTomoName}_ctf.txt'
-    defocus = np.loadtxt(defocus_file)[:,1:3]
+    ts_root = str(tsa_path / 'external' / star_row.rlnTomoName)
+    defocus_file = f'{ts_root}/{star_row.rlnTomoName}_ctf.txt'
+    defocus = np.loadtxt(defocus_file)[:,1:7]
     ts_star['rlnDefocusU'] = defocus[:,0]
     ts_star['rlnDefocusV'] = defocus[:,1]
+    ts_star['rlnDefocusAngle'] = defocus[:,2]
+    ts_star['rlnCtfFigureOfMerit'] = defocus[:,4]
+    ts_star['rlnCtfMaxResolution'] = defocus[:,5]
+    ts_star['rlnCtfImage'] = f'{ts_root}/{star_row.rlnTomoName}_ctf.mrc'
     output_name = Path(tilt_series_star_path)
     output_name = f'{str(output_name.parent)}/{str(output_name.stem)}_ctf.star'
     starfile.write(ts_star,output_name)

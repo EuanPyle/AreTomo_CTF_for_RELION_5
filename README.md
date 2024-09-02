@@ -10,7 +10,7 @@ It does not perform or overwrite tilt series alignment.
 
 # Installation
 
-`pip install AreTomo_CTF_for_RELION_5`
+`pip install AreTomo-CTF-for-RELION-5`
 
 # Use
 

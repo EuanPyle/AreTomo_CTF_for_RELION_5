@@ -3,15 +3,13 @@ from pathlib import Path
 import os
 import numpy as np
 
-def run_aretomo2_ctf(star_row, tsa_is_imod, tsa_dir):
-    tsa_path = tsa_dir
+def run_aretomo2_ctf(star_row, exe, tsa_is_imod, tsa_dir):
     ts_name = star_row.rlnTomoName
     voltage = star_row.rlnVoltage
     cs = star_row.rlnSphericalAberration
     ac = star_row.rlnAmplitudeContrast
     pix_size = star_row.rlnTomoTiltSeriesPixelSize
-    tsa_path = Path(star_row.rlnTomoTiltSeriesStarFile).parent.parent
-    ts_path = tsa_path / 'external' / ts_name 
+    ts_path = tsa_dir / 'external' / ts_name 
 
     command = f'{exe} -InMrc {str(ts_path)}/{ts_name}.mrc -OutMrc {str(ts_path)}/delete_me.mrc -Align 0 -PixSize {pix_size} -Kv {voltage} -Cs {cs} -AmpContrast {ac} -VolZ 0 -DarkTol 0.0000000001'
 
@@ -26,8 +24,7 @@ def run_aretomo2_ctf(star_row, tsa_is_imod, tsa_dir):
 def update_defocus(star_row, tsa_dir):
     tilt_series_star_path = Path(star_row.rlnTomoTiltSeriesStarFile)
     ts_star = starfile.read(tilt_series_star_path)
-    tsa_path = tsa_dir
-    ts_root = str(tsa_path / 'external' / star_row.rlnTomoName)
+    ts_root = str(tsa_dir / 'external' / star_row.rlnTomoName)
     defocus_file = f'{ts_root}/{star_row.rlnTomoName}_ctf.txt'
     defocus = np.loadtxt(defocus_file)[:,1:7]
     ts_star['rlnDefocusU'] = defocus[:,0]

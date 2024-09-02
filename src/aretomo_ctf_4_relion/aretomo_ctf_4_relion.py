@@ -9,9 +9,9 @@ from .utils import update_defocus, run_aretomo2_ctf, update_global_star
 cli = typer.Typer(add_completion=False)
 @cli.command(name='aretomo_ctf_4_relion')
 def estimate_ctf(
-        input_star: Path = typer.Option(...),
-        output_star: Path = typer.Option(...),
-        tsa_dir: Path = typer.Option(...),
+        input_star: Path = typer.Option(...,"--input-star","-i"),
+        output_star: Path = typer.Option(...,"--ouput-star","-o"),
+        tsa_dir: Path = typer.Option(...,"--tsa-dir","-t"),
         exe: Optional[str] = typer.Option('AreTomo2'),
         tsa_is_imod: Optional[bool] = typer.Option(False),
 ):
@@ -28,7 +28,7 @@ def estimate_ctf(
         Desired output file name. 
 
     tsa_dir: Path
-        Any TiltSeriesAlignment job directory which contains all your tomograms. e.g. AlignTiltSeries/job015/
+        The TiltSeriesAlignment job directory which your tomograms were aligned in. e.g. AlignTiltSeries/job015/
 
     exe: Optional[str]
         The command which brings up AreTomo2 on the command line. e.g. AreTomo2, or: /some/path/to/AT2/AreTomo2
@@ -38,7 +38,7 @@ def estimate_ctf(
 
     """
     ori_star = starfile.read(input_star)
-    ori_star.apply(lambda star_row: run_aretomo2_ctf(star_row, tsa_is_imod, tsa_dir), axis=1)
+    ori_star.apply(lambda star_row: run_aretomo2_ctf(star_row, exe, tsa_is_imod, tsa_dir), axis=1)
     ori_star.apply(lambda star_row: update_defocus(star_row, tsa_dir), axis=1)
     ori_star['rlnTomoTiltSeriesStarFile'] = ori_star.apply(lambda star_row: update_global_star(star_row), axis=1)
     starfile.write(ori_star,output_star)
